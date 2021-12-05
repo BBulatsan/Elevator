@@ -3,8 +3,8 @@ package main
 import (
 	"time"
 
-	"elevator2/models"
-	"elevator2/modules/people"
+	"Elevator/models"
+	"Elevator/modules/people"
 )
 
 func main() {

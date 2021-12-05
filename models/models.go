@@ -3,6 +3,7 @@ package models
 import (
 	"fmt"
 	"sort"
+	"sync"
 )
 
 type Elevator struct {
@@ -11,6 +12,8 @@ type Elevator struct {
 	MaximumAmount   int
 	AvailableFloors []int
 	Place           int
+	Chanel          chan Person
+	ServiceChanel   chan string
 }
 
 type Person struct {
@@ -18,20 +21,15 @@ type Person struct {
 	Dest  int
 }
 
-func (e *Elevator) Pickup(p Person) {
-	sort.Ints(e.AvailableFloors)
-	if (e.MaximumAmount > len(e.Persons)) && (p.Begin >= e.AvailableFloors[0]) && (p.Dest <= e.AvailableFloors[len(e.AvailableFloors)-1]) {
-		e.Persons = append(e.Persons, p)
-		e.Mapping(e.Persons)
-	} else {
-		fmt.Printf("out of number: %d >= %d\n", e.MaximumAmount, len(e.Persons))
-		fmt.Printf("begin %d >= available %d\n", p.Begin, e.AvailableFloors[0])
-		fmt.Printf("dest %d <= available %d\n\n", p.Dest, e.AvailableFloors[len(e.AvailableFloors)-1])
-	}
-
+func (e *Elevator) Pickup(people chan Person, wg *sync.WaitGroup) {
+	p := <-people
+	e.Persons = append(e.Persons, p)
+	e.Mapping(e.Persons)
+	defer wg.Done()
 }
 
 func (e *Elevator) dropout(p Person) {
+	fmt.Println(p)
 	for i, num := range e.Persons {
 		if num == p {
 			e.Persons = append(e.Persons[:i], e.Persons[i+1:]...)
@@ -58,7 +56,7 @@ func (e *Elevator) moveUp(level int) {
 	}
 }
 
-func (e *Elevator) Move(name int) {
+func (e *Elevator) Move(name int, wg *sync.WaitGroup) {
 	for _, level := range e.RoadMap {
 		if (e.Place - level) < 0 {
 			e.moveUp(level)
@@ -73,6 +71,7 @@ func (e *Elevator) Move(name int) {
 		fmt.Printf("Лифт %d приехал на %d\n", name, e.Place)
 		e.QuantityOfPeople()
 	}
+	defer wg.Done()
 }
 
 func (e *Elevator) Mapping(places []Person) {

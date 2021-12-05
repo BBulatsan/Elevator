@@ -6,9 +6,11 @@ import (
 )
 
 type Elevator struct {
-	Persons []Person
-	RoadMap []int
-	Place   int
+	Persons         []Person
+	RoadMap         []int
+	MaximumAmount   int
+	AvailableFloors []int
+	Place           int
 }
 
 type Person struct {
@@ -17,8 +19,16 @@ type Person struct {
 }
 
 func (e *Elevator) Pickup(p Person) {
-	e.Persons = append(e.Persons, p)
-	e.Mapping(e.Persons)
+	sort.Ints(e.AvailableFloors)
+	if (e.MaximumAmount > len(e.Persons)) && (p.Begin >= e.AvailableFloors[0]) && (p.Dest <= e.AvailableFloors[len(e.AvailableFloors)-1]) {
+		e.Persons = append(e.Persons, p)
+		e.Mapping(e.Persons)
+	} else {
+		fmt.Printf("out of number: %d >= %d\n", e.MaximumAmount, len(e.Persons))
+		fmt.Printf("begin %d >= available %d\n", p.Begin, e.AvailableFloors[0])
+		fmt.Printf("dest %d <= available %d\n\n", p.Dest, e.AvailableFloors[len(e.AvailableFloors)-1])
+	}
+
 }
 
 func (e *Elevator) dropout(p Person) {
@@ -36,7 +46,6 @@ func (e Elevator) QuantityOfPeople() {
 
 func (e *Elevator) moveDown(level int) {
 	for i := e.Place; i >= level; i-- {
-		//time.Sleep(1 * time.Second) //для красоты, реализма
 		fmt.Println("Moving down\n level:", i)
 		e.Place = i
 	}
@@ -44,13 +53,12 @@ func (e *Elevator) moveDown(level int) {
 
 func (e *Elevator) moveUp(level int) {
 	for i := e.Place; i <= level; i++ {
-		//time.Sleep(1 * time.Second)
 		fmt.Println("Moving up\n level:", i)
 		e.Place = i
 	}
 }
 
-func (e *Elevator) Move() {
+func (e *Elevator) Move(name int) {
 	for _, level := range e.RoadMap {
 		if (e.Place - level) < 0 {
 			e.moveUp(level)
@@ -62,9 +70,8 @@ func (e *Elevator) Move() {
 				e.dropout(num)
 			}
 		}
-		fmt.Println("Приехал на ", e.Place)
+		fmt.Printf("Лифт %d приехал на %d\n", name, e.Place)
 		e.QuantityOfPeople()
-		//time.Sleep(1 * time.Second)
 	}
 }
 

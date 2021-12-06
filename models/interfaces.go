@@ -1,6 +1,6 @@
 package models
 
-type Elevatorer interface {
+type Elevators interface {
 	Move
 	Move([]int)
 }

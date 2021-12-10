@@ -44,14 +44,14 @@ func (e Elevator) QuantityOfPeople() {
 
 func (e *Elevator) moveDown(level int) {
 	for i := e.Place; i >= level; i-- {
-		fmt.Println("Moving down\n level:", i)
+		//fmt.Println("Moving down\n level:", i)
 		e.Place = i
 	}
 }
 
 func (e *Elevator) moveUp(level int) {
 	for i := e.Place; i <= level; i++ {
-		fmt.Println("Moving up\n level:", i)
+		//fmt.Println("Moving up\n level:", i)
 		e.Place = i
 	}
 }

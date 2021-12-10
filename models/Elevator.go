@@ -10,6 +10,9 @@ import (
 var wg1 sync.WaitGroup
 var wg2 sync.WaitGroup
 
+const do = "do"
+const exit = "exit"
+
 func (e *Elevator) DoWork(ch chan Person, name int) {
 	time.Sleep(1 * time.Second)
 	go func() {
@@ -18,7 +21,7 @@ func (e *Elevator) DoWork(ch chan Person, name int) {
 			case x := <-e.ServiceChanel:
 
 				switch x {
-				case "do":
+				case do:
 					numPeople := 0
 					numFall := 0
 					{
@@ -50,7 +53,7 @@ func (e *Elevator) DoWork(ch chan Person, name int) {
 						go e.Move(name, &wg1)
 						wg1.Wait()
 					}
-				case "exit":
+				case exit:
 					fmt.Println("exit")
 					close(e.Chanel)
 					close(e.ServiceChanel)

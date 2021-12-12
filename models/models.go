@@ -29,11 +29,11 @@ func (e *Elevator) Pickup(people chan Person, wg *sync.WaitGroup) {
 }
 
 func (e *Elevator) dropout(p Person) {
-	fmt.Println(p)
 	for i, num := range e.Persons {
 		if num == p {
 			e.Persons = append(e.Persons[:i], e.Persons[i+1:]...)
 			e.Mapping(e.Persons)
+			break
 		}
 	}
 }

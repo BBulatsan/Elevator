@@ -3,7 +3,6 @@ package models
 import (
 	"fmt"
 	"sort"
-	"sync"
 )
 
 type Elevator struct {
@@ -12,7 +11,6 @@ type Elevator struct {
 	MaximumAmount   int
 	AvailableFloors []int
 	Place           int
-	Chanel          chan Person
 	ServiceChanel   chan string
 }
 
@@ -21,11 +19,9 @@ type Person struct {
 	Dest  int
 }
 
-func (e *Elevator) Pickup(people chan Person, wg *sync.WaitGroup) {
-	p := <-people
+func (e *Elevator) Pickup(p Person) {
 	e.Persons = append(e.Persons, p)
 	e.Mapping(e.Persons)
-	defer wg.Done()
 }
 
 func (e *Elevator) dropout(p Person) {
@@ -56,7 +52,7 @@ func (e *Elevator) moveUp(level int) {
 	}
 }
 
-func (e *Elevator) Move(name int, wg *sync.WaitGroup) {
+func (e *Elevator) Move(name int) {
 	for _, level := range e.RoadMap {
 		if (e.Place - level) < 0 {
 			e.moveUp(level)
@@ -71,7 +67,6 @@ func (e *Elevator) Move(name int, wg *sync.WaitGroup) {
 		fmt.Printf("Лифт %d приехал на %d\n", name, e.Place)
 		e.QuantityOfPeople()
 	}
-	defer wg.Done()
 }
 
 func (e *Elevator) Mapping(places []Person) {

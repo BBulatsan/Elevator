@@ -1,8 +1,14 @@
 package models
 
 import (
-	"fmt"
 	"sort"
+)
+
+const (
+	drop     = "drop"
+	pick     = "pick"
+	moveDown = "moveDown"
+	moveUp   = "moveUp"
 )
 
 type Elevator struct {
@@ -11,7 +17,6 @@ type Elevator struct {
 	MaximumAmount   int
 	AvailableFloors []int
 	Place           int
-	ServiceChanel   chan string
 }
 
 type Person struct {
@@ -19,12 +24,27 @@ type Person struct {
 	Dest  int
 }
 
-func (e *Elevator) Pickup(p Person) {
+type Log struct {
+	id               int
+	Name             int
+	Place            int
+	QuantityOfPeople int
+	Action           string
+}
+
+func (e *Elevator) Pickup(p Person, log chan Log, name int) {
 	e.Persons = append(e.Persons, p)
+	act := Log{
+		Name:             name,
+		Place:            e.Place,
+		QuantityOfPeople: e.QuantityOfPeople(),
+		Action:           pick,
+	}
+	log <- act
 	e.Mapping(e.Persons)
 }
 
-func (e *Elevator) dropout(p Person) {
+func (e *Elevator) dropout(p Person, log chan Log, name int) {
 	for i, num := range e.Persons {
 		if num == p {
 			e.Persons = append(e.Persons[:i], e.Persons[i+1:]...)
@@ -32,40 +52,57 @@ func (e *Elevator) dropout(p Person) {
 			break
 		}
 	}
+	act := Log{
+		Name:             name,
+		Place:            e.Place,
+		QuantityOfPeople: e.QuantityOfPeople(),
+		Action:           drop,
+	}
+	log <- act
 }
 
-func (e Elevator) QuantityOfPeople() {
-	fmt.Println("Кол-во людей в лифте =", len(e.Persons))
+func (e Elevator) QuantityOfPeople() int {
+	return len(e.Persons)
 }
 
-func (e *Elevator) moveDown(level int) {
+func (e *Elevator) moveDown(level int, log chan Log, name int) {
 	for i := e.Place; i >= level; i-- {
-		//fmt.Println("Moving down\n level:", i)
 		e.Place = i
+		act := Log{
+			Name:             name,
+			Place:            e.Place,
+			QuantityOfPeople: e.QuantityOfPeople(),
+			Action:           moveDown,
+		}
+		log <- act
 	}
 }
 
-func (e *Elevator) moveUp(level int) {
+func (e *Elevator) moveUp(level int, log chan Log, name int) {
 	for i := e.Place; i <= level; i++ {
-		//fmt.Println("Moving up\n level:", i)
 		e.Place = i
+		act := Log{
+			Name:             name,
+			Place:            e.Place,
+			QuantityOfPeople: e.QuantityOfPeople(),
+			Action:           moveUp,
+		}
+		log <- act
 	}
 }
 
-func (e *Elevator) Move(name int) {
+func (e *Elevator) Move(log chan Log, name int) {
 	for _, level := range e.RoadMap {
 		if (e.Place - level) < 0 {
-			e.moveUp(level)
+			e.moveUp(level, log, name)
 		} else {
-			e.moveDown(level)
+			e.moveDown(level, log, name)
 		}
 		for _, num := range e.Persons {
 			if level == num.Dest {
-				e.dropout(num)
+				e.dropout(num, log, name)
 			}
 		}
-		fmt.Printf("Лифт %d приехал на %d\n", name, e.Place)
-		e.QuantityOfPeople()
 	}
 }
 

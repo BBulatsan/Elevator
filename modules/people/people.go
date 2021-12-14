@@ -1,22 +1,39 @@
 package people
 
 import (
-	"Elevator/models"
+	"context"
 	"math/rand"
+
+	"Elevator/models"
 )
 
-func GenPeople(ch chan models.Person) {
-	begin := 1 + rand.Intn(30-1+1)
-	dest := 1 + rand.Intn(30-1+1)
-	ch <- models.Person{Begin: begin, Dest: dest}
+func GenPeople(ctx context.Context, ch chan models.Person) {
+	select {
+	case <-ctx.Done():
+		return
+	default:
+		begin := 1 + rand.Intn(30-1+1)
+		dest := 1 + rand.Intn(30-1+1)
+		ch <- models.Person{Begin: begin, Dest: dest}
+	}
 }
 
-func GenMorningPeople(ch chan models.Person) {
-	dest := 2 + rand.Intn(29)
-	ch <- models.Person{Begin: 1, Dest: dest}
+func GenMorningPeople(ctx context.Context, ch chan models.Person) {
+	select {
+	case <-ctx.Done():
+		return
+	default:
+		dest := 2 + rand.Intn(29)
+		ch <- models.Person{Begin: 1, Dest: dest}
+	}
 }
 
-func GenEveningPeople(ch chan models.Person) {
-	begin := 2 + rand.Intn(29)
-	ch <- models.Person{Begin: begin, Dest: 1}
+func GenEveningPeople(ctx context.Context, ch chan models.Person) {
+	select {
+	case <-ctx.Done():
+		return
+	default:
+		begin := 2 + rand.Intn(29)
+		ch <- models.Person{Begin: begin, Dest: 1}
+	}
 }

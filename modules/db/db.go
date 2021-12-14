@@ -18,6 +18,9 @@ func Db() *sql.DB {
 }
 
 func AddLog(db *sql.DB, log models.Log) {
-	statement, _ := db.Prepare("INSERT INTO log ('Name', Place,QuantityOfPeople,ACT ) VALUES (?, ?, ?, ?)")
+	statement, err := db.Prepare("INSERT INTO log ('Name', Place,QuantityOfPeople,ACT ) VALUES (?, ?, ?, ?)")
+	if err != nil {
+		panic(err)
+	}
 	statement.Exec(log.Name, log.Place, log.QuantityOfPeople, log.Action)
 }

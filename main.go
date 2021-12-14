@@ -1,12 +1,14 @@
 package main
 
 import (
+	"context"
 	"time"
 
 	"Elevator/models"
 	"Elevator/modules/db"
 	"Elevator/modules/log"
 	"Elevator/modules/people"
+	"Elevator/modules/serv"
 )
 
 func main() {
@@ -17,33 +19,42 @@ func main() {
 	ch := make(chan models.Person, qt)
 	logs := make(chan models.Log, qt)
 
+	ctx, cancel := context.WithCancel(context.Background())
+	go serv.Cancel(cancel)
+
 	con := db.Db()
 	go log.Log(con, logs)
 
 	var elev1 = models.NewElevator(8, floes1)
 	var elev2 = models.NewElevator(8, floes2)
+
 	for i := 0; i < 3; i++ {
 		go func(id int) {
-			elev1.DoWork(ch, logs, id)
+			elev1.DoWork(ctx, ch, logs, id)
+
 		}(i)
 	}
 	for i := 3; i < 6; i++ {
 		go func(id int) {
-			elev2.DoWork(ch, logs, id)
+			elev2.DoWork(ctx, ch, logs, id)
 		}(i)
-
 	}
 
 	for i := 0; i < qt; i++ {
-		go people.GenEveningPeople(ch)
+		go people.GenMorningPeople(ctx, ch)
 	}
 
 	for {
-		if len(ch) != 0 {
+		select {
+		case <-ctx.Done():
+			return
+		default:
 			time.Sleep(1 * time.Second)
-
-		} else {
-			break
+			if len(ch) != 0 {
+				time.Sleep(1 * time.Second)
+			} else {
+				cancel()
+			}
 		}
 	}
 }

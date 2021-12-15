@@ -8,9 +8,15 @@ import (
 
 func Cancel(cancel context.CancelFunc) {
 	http.HandleFunc("/stop", func(w http.ResponseWriter, r *http.Request) {
-		fmt.Fprintf(w, "Service stoping...")
+		_, err := fmt.Fprintf(w, "Service stoping...")
+		if err != nil {
+			panic(err)
+		}
 		cancel()
 	})
-	http.ListenAndServe(":12345", nil)
+	err := http.ListenAndServe(":12345", nil)
+	if err != nil {
+		panic(err)
+	}
 
 }

@@ -50,9 +50,7 @@ func main() {
 			return
 		default:
 			time.Sleep(1 * time.Second)
-			if len(ch) != 0 {
-				time.Sleep(1 * time.Second)
-			} else {
+			if len(ch) == 0 {
 				cancel()
 			}
 		}

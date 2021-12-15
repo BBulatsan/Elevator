@@ -12,8 +12,8 @@ func GenPeople(ctx context.Context, ch chan models.Person) {
 	case <-ctx.Done():
 		return
 	default:
-		begin := 1 + rand.Intn(30-1+1)
-		dest := 1 + rand.Intn(30-1+1)
+		begin := 1 + rand.Intn(30)
+		dest := 1 + rand.Intn(30)
 		ch <- models.Person{Begin: begin, Dest: dest}
 	}
 }
